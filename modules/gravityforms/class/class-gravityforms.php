@@ -48,7 +48,7 @@ class GravityForms extends Singleton_Util {
 			$dolibarr_url = $dolibarr_option['dolibarr_url'];
 
 			if ( ! empty( gform_get_meta( $entry['id'], 'easycrm_project_id' ) ) ) {
-				return '<span><a href="' . esc_url( $dolibarr_url . '/projet/card.php?id=' . gform_get_meta( $entry['id'], 'easycrm_project_id' ) ) . '" style="color: #32CD32; font-weight: bold;" target="_blank">Importé</a></span>';
+				return '<span><a href="' . esc_url( $dolibarr_url . '/projet/card.php?id=' . gform_get_meta( $entry['id'], 'easycrm_project_id' ) ) . '" style="color: #32CD32; font-weight: bold;" target="_blank">Importé <span class="dashicons dashicons-external"></span></a></span>';
 			} else {
 				return '<span style="color: #DC143C; font-weight: bold;">Non importé</span>';
 			}

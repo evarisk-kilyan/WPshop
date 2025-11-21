@@ -92,12 +92,16 @@ class Doli_Products extends Singleton_Util {
 
 	public function update_post_image( $post_id, $doli_id ) {
 		$files = Request_Util::get('documents?modulepart=product&id=' . $doli_id);
-		
+		$files = array_filter($files, function($file) {
+			$allowed_mime_types = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
+			return in_array(mime_content_type($file['fullname']), $allowed_mime_types);
+		});
+
 		if (empty($files)) {
 			return;
 		}
 
-		$file = $files[0];
+		$file = current($files);
 
 		$level1 = $file['level1name'];
 		$filename = $file['filename'];
@@ -109,7 +113,6 @@ class Doli_Products extends Singleton_Util {
 			'post_parent'    => $post_id,
 			'title'          => sanitize_file_name($filename),
 		));
-
 
 		// If attachment exists and is set as featured image, don't recreate
 		if (!empty($existing_attachment)) {

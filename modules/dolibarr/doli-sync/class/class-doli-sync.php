@@ -178,12 +178,12 @@ class Doli_Sync extends Singleton_Util {
 				break;
 			case 'wps-product':
 				$doli_product = Request_Util::get( 'products/' . $entry_id );
-				
+
 				$wp_product   = Product::g()->get( array( 'id' => $wp_id ), true );
 				$wp_product   = Doli_Products::g()->doli_to_wp( $doli_product, $wp_product );
 				Doli_Products::g()->update_post_image( $wp_product->data['id'], $entry_id );
 
-				$messages[] = sprintf( __( 'Erase data for the product <strong>%s</strong> with the <strong>dolibarr</strong> data', 'wpshop' ), $wp_product->data['title'] );
+				//$messages[] = sprintf( __( 'Erase data for the product <strong>%s</strong> with the <strong>dolibarr</strong> data', 'wpshop' ), $wp_product->data['title'] );
 
 				echo do_shortcode('[wps_categories product_id="' . $wp_product->data['id'] . '"]');
 
@@ -191,7 +191,12 @@ class Doli_Sync extends Singleton_Util {
 				$wpdb->delete($wpdb->prefix . 'term_relationships', array( 'object_id' => $wp_product->data['id'] ) );
 				if ( ! empty( $doli_categories ) ) {
 					foreach ( $doli_categories as $doli_category ) {
-						$term_taxonomy_id = get_term_by('name', $doli_category->label, 'wps-product-cat' )->term_id;
+						$term_taxonomy = get_term_by('name', $doli_category->label, 'wps-product-cat' );
+						if (isset($term_taxonomy->term_id)) {
+							$term_taxonomy_id = $term_taxonomy->term_id;
+						} else {
+							continue;
+						}
 						$wpdb->insert( $wpdb->prefix . 'term_relationships', array( 'object_id' => $wp_product->data['id'] , 'term_taxonomy_id' => $term_taxonomy_id, 'term_order' => 0 ) );
 					}
 				}
@@ -357,20 +362,25 @@ class Doli_Sync extends Singleton_Util {
 			$current_thumbnail_id = get_post_thumbnail_id($id);
 
 			$files = Request_Util::get('documents?modulepart=product&id=' . $external_id);
+			// sort only fullname is image
+			$files = array_filter($files, function($file) {
+				$allowed_mime_types = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
+				return in_array(mime_content_type($file['fullname']), $allowed_mime_types);
+			});
 
 			if (!empty($current_thumbnail_id) || !empty($files)) {
-				$file = $files[0];
+				$file = current($files);
 
 				$existing_attachment = get_posts(array(
 					'post_type'      => 'attachment',
 					'posts_per_page' => 1,
 					'post_parent'    => $id,
-					'title'          => sanitize_file_name($file['filename']),
+					'title'          => sanitize_file_name($file['filename'] ?? ''),
 				));
 
 				if ((!empty($current_thumbnail_id) && empty($existing_attachment)) || 
-					$current_thumbnail_id != $existing_attachment[0]->ID ||
-					empty($existing_attachment) && !empty($files)) {
+				 	empty($existing_attachment) && !empty($files) ||
+					$current_thumbnail_id != $existing_attachment[0]->ID) {
 					return array(
 						'status' => true,
 						'status_code' => '0x3',

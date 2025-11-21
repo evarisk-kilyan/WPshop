@@ -99,6 +99,29 @@ defined( 'ABSPATH' ) || exit;
 				</label>
 			</div>
 		<?php endif; ?>
+		<div class="form-element">
+			<span class="form-label"><?php esc_html_e( 'Description', 'wpshop' ); ?></span>
+			<label class="form-field-container">
+				<textarea class="form-field" name="product_data[description]" readonly><?php echo esc_attr( $doliProduct->description ); ?></textarea>
+			</label>
+		</div>
+		<div class="form-element">
+			<label for="product-price" class="form-label">
+				<?php esc_html_e( 'Price', 'wpshop' ); ?>
+			</label>
+			<div class="form-field-container">
+				<input 
+					type="text"
+					id="product-price"
+					class="form-field"
+					name="product_data[price]"
+					value="<?php echo esc_attr( number_format( (float) $doliProduct->price, 2, '.', '' ) ); ?>"
+					readonly
+				/>
+				<span class="form-suffix">€</span>
+			</div>
+		</div>
+		<div class="
 	<?php endif; ?>
 		<div class="wpeo-notice notice-info">
 			<div class="notice-content">

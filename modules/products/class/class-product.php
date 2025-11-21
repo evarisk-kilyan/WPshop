@@ -125,6 +125,7 @@ class Product extends Post_Class {
 			'posts_per_page' => $per_page,
 			'post_status'    => 'any',
 		) );
+		$product_ids = is_array( $product_ids ) ? $product_ids : array();
 
 		$products = array();
 
