@@ -288,7 +288,38 @@ class Doli_Sync extends Singleton_Util {
 		}
 
 		// Dolibarr Object is not linked to this WP Object.
-		if ( $response->array_options->options__wps_id != $id ) {
+		// if ( $response->array_options->options__wps_id != $id ) {
+		// 	// @todo: Doublon
+		// 	if ( $type == 'wps-user' ) {
+		// 		delete_user_meta( $id, '_external_id' );
+		// 		delete_user_meta( $id, '_sync_sha_256' );
+		// 	} elseif ( $type == 'wps-product-cat' ) {
+		// 		delete_term_meta( $id, '_external_id' );
+		// 		delete_term_meta( $id, '_sync_sha_256' );
+		// 	} else {
+		// 		delete_post_meta( $id, '_external_id' );
+		// 		delete_post_meta( $id, '_sync_sha_256' );
+		// 	}
+
+		// 	return array(
+		// 		'status' => true,
+		// 		'status_code' => '0x2',
+		// 		'status_message' => 'Dolibarr Object is not linked to this WP Object.',
+		// 	);
+		// }
+
+		$object_id = null;
+		if (!empty($response->array_options->options__wps_info)) {
+			$json = json_decode($response->array_options->options__wps_info, true);
+
+			foreach ($json as $key => $value) {
+				if (parse_url($key, PHP_URL_HOST) == $_SERVER['HTTP_HOST']) {
+					$object_id = $value['wps_id'];
+				}
+			}
+		}
+
+		if ( $object_id != $id ) {
 			// @todo: Doublon
 			if ( $type == 'wps-user' ) {
 				delete_user_meta( $id, '_external_id' );
@@ -307,6 +338,7 @@ class Doli_Sync extends Singleton_Util {
 				'status_message' => 'Dolibarr Object is not linked to this WP Object.',
 			);
 		}
+
 
 		$object_id = $response->array_options->options__wps_id;
 		$doli_categories = Request_Util::get('categories/object/product/' . $response->id . '?');

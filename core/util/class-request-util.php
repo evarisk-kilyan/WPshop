@@ -110,12 +110,12 @@ class Request_Util extends Singleton_Util {
 			'headers' => array(
 				'Content-type' => 'application/json',
 				'DOLAPIKEY'    => $dolibarr_option['dolibarr_secret'],
+				'X-Origin'     => $_SERVER['HTTP_HOST']
 			),
 		) );
 
 		if ( ! is_wp_error( $request ) ) {
 			if ( 200 === $request['response']['code'] ) {
-				
 				if ( strpos( $end_point, 'documents?modulepart=product' ) !== false ) {
 					return json_decode(wp_remote_retrieve_body($request), true);
 				}
